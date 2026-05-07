@@ -85,6 +85,26 @@ def test_create_note_no_yaml_frontmatter(tmp_path):
     assert not text.startswith("---")
 
 
+def test_create_note_with_body(tmp_path):
+    path = create_note("Test idea", tmp_path, now=FIXED_NOW, body="Extra content.")
+    text = path.read_text()
+    assert "Extra content." in text
+
+
+def test_create_note_body_appears_after_timestamp(tmp_path):
+    path = create_note("Test idea", tmp_path, now=FIXED_NOW, body="Body here.")
+    lines = path.read_text().splitlines()
+    ts_idx = next(i for i, ln in enumerate(lines) if "2026-03-22T14:30:00" in ln)
+    body_idx = next(i for i, ln in enumerate(lines) if "Body here." in ln)
+    assert body_idx > ts_idx
+
+
+def test_create_note_empty_body_no_extra_content(tmp_path):
+    path = create_note("Test idea", tmp_path, now=FIXED_NOW, body="")
+    lines = [ln for ln in path.read_text().splitlines() if ln.strip()]
+    assert len(lines) == 2  # heading + timestamp only
+
+
 def test_create_note_returns_absolute_path(tmp_path):
     path = create_note("Test idea", tmp_path, now=FIXED_NOW)
     assert path.is_absolute()
