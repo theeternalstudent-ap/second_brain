@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import sys
 from pathlib import Path
 
 import click
@@ -20,13 +21,16 @@ def cli():
 
 @cli.command()
 @click.argument("title")
-def new(title: str):
+@click.option("--body", "-b", default=None, help="Body text for the note.")
+def new(title: str, body: str | None):
     """Create a new note with the given TITLE."""
+    if body is None and not sys.stdin.isatty():
+        body = sys.stdin.read().strip()
     base_dir = Path(
         os.environ.get("SECOND_BRAIN_DIR", str(Path.home() / "second_brain"))
     ).expanduser()
     logger.debug("Creating note in {}", base_dir)
-    path = create_note(title, base_dir)
+    path = create_note(title, base_dir, body=body or "")
     logger.info("Created note: {}", path)
     click.echo(path)
 

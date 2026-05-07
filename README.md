@@ -15,10 +15,14 @@ uv sync
 The CLI exposes three subcommands:
 
 ```bash
-uv run second_brain new "My brilliant idea"   # create a note
-uv run second_brain list                      # list notes (newest first)
-uv run second_brain show 1                    # print the contents of note 1
+uv run second_brain new "My brilliant idea"                   # create a note
+uv run second_brain new "My idea" --body "Note content here"  # create with body text
+echo "Note content here" | uv run second_brain new "My idea"  # create with piped stdin
+uv run second_brain list                                       # list notes (newest first)
+uv run second_brain show 1                                     # print the contents of note 1
 ```
+
+The `--body` / `-b` flag takes precedence over piped stdin when both are supplied.
 
 With dev environment variables loaded:
 

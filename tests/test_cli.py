@@ -61,6 +61,47 @@ def test_cli_new_missing_title_shows_error():
     assert "Missing argument" in result.output
 
 
+def test_cli_new_with_body_flag(tmp_note_dir):
+    result = runner.invoke(cli, ["new", "Body test", "--body", "My body content."])
+    assert result.exit_code == 0
+    md_file = next(tmp_note_dir.glob("*.md"))
+    assert "My body content." in md_file.read_text()
+
+
+def test_cli_new_with_body_short_flag(tmp_note_dir):
+    result = runner.invoke(cli, ["new", "Body test", "-b", "Short flag content."])
+    assert result.exit_code == 0
+    md_file = next(tmp_note_dir.glob("*.md"))
+    assert "Short flag content." in md_file.read_text()
+
+
+def test_cli_new_with_stdin_body(tmp_note_dir):
+    result = runner.invoke(cli, ["new", "Stdin test"], input="Piped body content.")
+    assert result.exit_code == 0
+    md_file = next(tmp_note_dir.glob("*.md"))
+    assert "Piped body content." in md_file.read_text()
+
+
+def test_cli_new_body_flag_beats_stdin(tmp_note_dir):
+    result = runner.invoke(
+        cli, ["new", "Priority test", "--body", "Flag wins."], input="Stdin loses."
+    )
+    assert result.exit_code == 0
+    md_file = next(tmp_note_dir.glob("*.md"))
+    text = md_file.read_text()
+    assert "Flag wins." in text
+    assert "Stdin loses." not in text
+
+
+def test_cli_new_no_body_backward_compatible(tmp_note_dir):
+    result = runner.invoke(cli, ["new", "No body"])
+    assert result.exit_code == 0
+    md_file = next(tmp_note_dir.glob("*.md"))
+    lines = md_file.read_text().splitlines()
+    assert lines[0] == "# No body"
+    assert len([ln for ln in lines if ln.strip()]) == 2  # heading + timestamp only
+
+
 def test_cli_new_file_content_has_heading(tmp_note_dir):
     result = runner.invoke(cli, ["new", "My heading test"])
     assert result.exit_code == 0

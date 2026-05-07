@@ -37,11 +37,14 @@ def create_note(
     title: str,
     base_dir: Path,
     now: datetime | None = None,
+    body: str = "",
 ) -> Path:
     """Create a markdown note file and return its absolute path."""
     now = now or datetime.now()
     path = build_note_path(title, base_dir, now.date())
     timestamp = now.replace(microsecond=0).isoformat()
     content = f"# {title}\n\n{timestamp}\n"
+    if body:
+        content += f"\n{body}\n"
     path.write_text(content, encoding="utf-8")
     return path.resolve()
